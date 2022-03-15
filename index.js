@@ -311,14 +311,14 @@ async function verifyUserExists(
   } catch (error) {
     throw {admin: error}
   }
-  var user = await _searchUser(
+  var ldapObject = await _searchUser(
     ldapAdminClient,
     userSearchBase,
     usernameAttribute,
     username
   )
   ldapAdminClient.unbind()
-  if (!user || !user.dn) {
+  if (!ldapObject.user || !ldapObject.user.dn) {
     ldapOpts.log &&
     ldapOpts.log.trace(
       `admin did not find user! (${usernameAttribute}=${username})`
@@ -341,15 +341,15 @@ async function verifyUserExists(
     var groups = await _searchUserGroups(
       ldapAdminClient,
       groupsSearchBase,
-      user,
+      ldapObject.user,
       groupClass,
       groupMemberAttribute,
       groupMemberUserAttribute
     )
-    user.groups = groups
+    ldapObject.user.groups = groups
     ldapAdminClient.unbind()
   }
-  return user
+  return ldapObject
 }
 
 async function authenticate(options) {
